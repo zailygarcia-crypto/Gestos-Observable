@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evaluación por gestos observables</title>
+<meta name="description" content="Descriptores de nivel por línea y ciclo, banco de gestos observables organizado por principios DUA y registro del grupo.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&display=swap">
+<style>
+/* Paleta Colsubsidio (azul marino, azul corporativo, amarillo) + colores semánticos de nivel y de principios DUA */
+:root{
+  --bg:#f5f7fb; --surface:#ffffff; --tint:#eaf0f8; --fg:#0d1f3c; --muted:#4d5e7a; --line:#d5deeb;
+  --navy:#002060; --title:#002060; --blue:#0967b1; --link:#0967b1; --yellow:#fecf01; --on-yellow:#002060; --on-navy:#ffffff;
+  --lv1:#c0584b; --lv2:#d99a2b; --lv3:#3e86c9; --lv4:#3e9b6b;
+  --dua-c:#2f8a57; --dua-c-bg:#e5f4ec; --dua-r:#6a4bb0; --dua-r-bg:#eee8fa; --dua-a:#0967b1; --dua-a-bg:#e3eefa;
+  --display:"Montserrat","Segoe UI",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0a1226; --surface:#111c36; --tint:#16244a; --fg:#e6ecf7; --muted:#a3b2cc; --line:#26365e;
+  --navy:#0b2b72; --title:#e6ecf7; --blue:#4c9be0; --link:#8cc2f2;
+  --lv1:#e0857a; --lv2:#e8b75a; --lv3:#78b2e8; --lv4:#6cc493;
+  --dua-c:#7fd3a3; --dua-c-bg:#14301f; --dua-r:#c2aef5; --dua-r-bg:#241c3d; --dua-a:#8cc2f2; --dua-a-bg:#132a45;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1226; --surface:#111c36; --tint:#16244a; --fg:#e6ecf7; --muted:#a3b2cc; --line:#26365e;
+  --navy:#0b2b72; --title:#e6ecf7; --blue:#4c9be0; --link:#8cc2f2;
+  --lv1:#e0857a; --lv2:#e8b75a; --lv3:#78b2e8; --lv4:#6cc493;
+  --dua-c:#7fd3a3; --dua-c-bg:#14301f; --dua-r:#c2aef5; --dua-r-bg:#241c3d; --dua-a:#8cc2f2; --dua-a-bg:#132a45;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:22px 36px}
+.wrap{max-width:1100px;margin:0 auto;display:grid;gap:20px}
+h1,h2,h3{font-family:var(--display);color:var(--title);margin:0;text-wrap:balance;line-height:1.2}
+h1{font-weight:800;font-size:clamp(24px,3.4vw,36px)}
+h2{font-weight:700;font-size:20px}
+h3{font-weight:700;font-size:15px}
+p{margin:0}
+header{border-left:6px solid var(--yellow);padding-left:16px;display:grid;gap:8px}
+.lede{color:var(--muted);max-width:72ch}
+.lede strong{color:var(--fg)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;display:grid;gap:16px;min-width:0}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 16px}
+.sec-head p{color:var(--muted);font-size:14.5px;max-width:70ch}
+.step{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--yellow);color:var(--on-yellow);font:800 13px var(--display);margin-right:8px;vertical-align:2px}
+.selects{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:560px){.selects{grid-template-columns:1fr}}
+label.f{display:grid;gap:5px;font-weight:600;font-size:14px}
+select,input{font:inherit;color:var(--fg);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 11px;width:100%;min-width:0}
+select:focus-visible,input:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.lvl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.lvl{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.lvl{grid-template-columns:1fr}}
+.lv{background:var(--tint);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:10px;padding:12px 14px;display:grid;gap:4px;align-content:start}
+.lv h3{font-size:15px;color:var(--c)}
+.lv p{font-size:14.5px}
+.note{font-size:13.5px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 13.5px var(--body);border:1.5px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.dua-key{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:760px){.dua-key{grid-template-columns:1fr}}
+.dk{border-radius:10px;padding:10px 12px;background:var(--bg-c);border:1px solid var(--line)}
+.dk b{display:block;font-family:var(--display);font-size:13.5px;color:var(--c)}
+.dk span{font-size:13.5px;color:var(--fg)}
+.bank{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:860px){.bank{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.bank{grid-template-columns:1fr}}
+.g{border:1px solid var(--line);border-left:5px solid var(--c);border-radius:10px;padding:12px 14px;background:var(--surface);display:grid;gap:8px;align-content:start;min-width:0}
+.g .tag{justify-self:start;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--c);background:var(--bg-c);border-radius:4px;padding:2px 8px}
+.g .txt{font-weight:600;font-size:15px}
+.g .alt{font-size:13.5px;color:var(--muted)}
+.g .alt b{color:var(--fg);font-weight:600}
+.g .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:2px}
+.g .cyc{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.p-c{--c:var(--dua-c);--bg-c:var(--dua-c-bg)} .p-r{--c:var(--dua-r);--bg-c:var(--dua-r-bg)} .p-a{--c:var(--dua-a);--bg-c:var(--dua-a-bg)}
+.btn{font:700 14px var(--display);border-radius:999px;padding:9px 18px;cursor:pointer;border:2px solid var(--navy);background:var(--navy);color:var(--on-navy)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--navy)}
+.btn.sm{font-size:12.5px;padding:5px 12px;background:var(--yellow);border-color:var(--yellow);color:var(--on-yellow)}
+.btn:hover{filter:brightness(1.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.ghost{border-color:var(--blue)}}
+:root[data-theme="dark"] .btn.ghost{border-color:var(--blue)}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14.5px}
+th{background:var(--navy);color:var(--on-navy);text-align:left;font:700 13.5px var(--display);padding:11px 10px}
+td{padding:8px 10px;border-top:1px solid var(--line);vertical-align:middle}
+tbody tr:nth-child(even) td{background:var(--tint)}
+td input,td select{padding:7px 9px}
+.del{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:7px;width:32px;height:32px;cursor:pointer;font-size:17px;line-height:1}
+.del:hover{color:var(--lv1);border-color:var(--lv1)}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.status{font-size:13px;color:var(--muted)}
+.dist{display:grid;gap:6px}
+.dist-bar{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--tint);border:1px solid var(--line)}
+.dist-bar span{display:block;height:100%}
+.dist-legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.dist-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:0}
+footer{font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Evaluación por gestos observables</h1>
+  <p class="lede">Un gesto observable es algo que el(la) estudiante <strong>hace o dice</strong> y que se puede ver o escuchar durante la experiencia: explica, prueba, corrige, propone, ayuda a otro(a). Elija la línea y el ciclo, consulte los descriptores de nivel, tome gestos del banco DUA y registre lo que observa en su grupo.</p>
+</header>
+
+<section class="card" aria-labelledby="h-niveles">
+  <div class="sec-head"><h2 id="h-niveles"><span class="step">1</span>Descriptores de nivel</h2></div>
+  <div class="selects">
+    <label class="f" for="g-linea">Línea
+      <select id="g-linea">
+        <optgroup label="Ciencia y Tecnología"><option value="CILAB">CILAB</option><option value="NEOTECH">NEOTECH</option></optgroup>
+        <optgroup label="Formación Artística y Cultural"><option value="DANZA">Danza</option><option value="MUSICA">Música</option><option value="TEATRO">Teatro</option><option value="APV">Artes Plásticas y Visuales</option></optgroup>
+      </select></label>
+    <label class="f" for="g-ciclo">Ciclo
+      <select id="g-ciclo"><option value="1">Ciclo 1</option><option value="2" selected>Ciclo 2</option><option value="3">Ciclo 3</option><option value="4">Ciclo 4</option><option value="5">Ciclo 5</option></select></label>
+  </div>
+  <div class="lvl" id="lvl"></div>
+  <p class="note" id="lvlNote"></p>
+</section>
+
+<section class="card" aria-labelledby="h-banco">
+  <div class="sec-head">
+    <h2 id="h-banco"><span class="step">2</span>Banco de gestos observables con DUA</h2>
+    <p>Gestos sugeridos para la línea y el ciclo elegidos. Cada uno trae otra forma válida de mostrar el mismo aprendizaje.</p>
+  </div>
+  <div class="dua-key">
+    <div class="dk p-c"><b>Compromiso · el porqué</b><span>Interés, persistencia y conexión con su vida y su territorio.</span></div>
+    <div class="dk p-r"><b>Representación · el qué</b><span>Cómo percibe, nombra y comprende la información.</span></div>
+    <div class="dk p-a"><b>Acción y expresión · el cómo</b><span>Cómo hace, construye y comunica lo que aprendió.</span></div>
+  </div>
+  <div class="chips" role="group" aria-label="Filtrar por principio DUA">
+    <button class="chip" data-p="all" aria-pressed="true">Todos</button>
+    <button class="chip" data-p="c" aria-pressed="false">Compromiso</button>
+    <button class="chip" data-p="r" aria-pressed="false">Representación</button>
+    <button class="chip" data-p="a" aria-pressed="false">Acción y expresión</button>
+  </div>
+  <div class="bank" id="bank" aria-live="polite"></div>
+</section>
+
+<section class="card" aria-labelledby="h-reg">
+  <div class="sec-head">
+    <h2 id="h-reg"><span class="step">3</span>Registro del grupo</h2>
+    <p>Use “Registrar” en el banco o escriba el gesto. Lo que anota queda guardado en este navegador.</p>
+  </div>
+  <div class="tbl"><table>
+    <thead><tr><th style="width:22%">Estudiante</th><th>Gesto observado</th><th style="width:17%">Principio DUA</th><th style="width:13%">Nivel</th><th style="width:48px"><span style="position:absolute;left:-9999px">Quitar</span></th></tr></thead>
+    <tbody id="regBody"></tbody>
+  </table></div>
+  <datalist id="gestList"></datalist>
+  <div class="toolbar">
+    <button class="btn" id="addRow">Agregar estudiante</button>
+    <button class="btn ghost" id="copyReg">Copiar registro para Excel</button>
+    <button class="btn ghost" id="clearReg">Nuevo registro</button>
+    <span class="status" id="status" aria-live="polite"></span>
+  </div>
+  <div class="dist" aria-label="Distribución de niveles del grupo">
+    <h3>Distribución de niveles del grupo</h3>
+    <div class="dist-bar" id="distBar"></div>
+    <div class="dist-legend" id="distLegend"></div>
+  </div>
+</section>
+
+<footer>Descriptores de nivel: escala de niveles por ciclo de Corpoeducación 2026 (redacción ajustada). Principios DUA: CAST (2024), Universal Design for Learning Guidelines version 3.0. El banco de gestos es una propuesta de diseño sujeta a validación con los equipos de línea.</footer>
+</div>
+
+<script>
+(function(){
+var store={get:function(k){try{return localStorage.getItem('gestos-'+k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem('gestos-'+k,v)}catch(e){}}};
+
+/* ---------- Descriptores de nivel ---------- */
+var LV={
+  CILAB:{2:['Identifica conceptos básicos, pero aún no sigue instrucciones en actividades experimentales.','Usa herramientas tecnológicas básicas y participa en experimentos simples con apoyo.','Diseña y ejecuta experimentos simples, analiza datos y propone soluciones tecnológicas.','Lidera proyectos escolares, comunica resultados y aplica conceptos con sentido crítico.'],
+         3:['Identifica materiales, pero no sigue instrucciones básicas en experimentos guiados.','Usa herramientas tecnológicas para medir y registra datos de forma organizada.','Diseña y ejecuta experimentos, interpreta resultados y propone soluciones tecnológicas.','Lidera proyectos complejos, diseña soluciones innovadoras y comunica resultados con claridad.']},
+  NEOTECH:{2:['Tiene dificultad para identificar pasos lógicos al resolver problemas cotidianos.','Reconoce patrones y ordena pasos simples para resolver problemas.','Descompone problemas cotidianos y propone soluciones tecnológicas simples.','Implementa soluciones tecnológicas básicas y reflexiona sobre su impacto.'],
+           3:['Aplica algoritmos sin comprender su estructura ni propósito.','Representa algoritmos en pseudocódigo o diagramas de flujo con apoyo.','Diseña algoritmos complejos y aplica abstracciones para resolver problemas.','Optimiza algoritmos y desarrolla proyectos tecnológicos innovadores.'],
+           4:['Diseña soluciones digitales sin considerar su impacto ético ni funcional.','Usa herramientas digitales para crear soluciones básicas con orientación.','Crea productos digitales funcionales considerando aspectos éticos y sociales.','Diseña productos digitales que resuelven problemas reales con conciencia ética y técnica.']},
+  DANZA:{2:['Realiza movimientos sin intención comunicativa clara ni control corporal.','Explora formas de movimiento y comunicación por medio de la danza.','Ejecuta secuencias con intención comunicativa y expresión emocional.','Comunica emociones y narrativas a través de movimientos y gestos.'],
+         3:['Ejecuta secuencias sin aplicar técnicas ni expresar emociones.','Aplica técnicas básicas en secuencias sencillas con apoyo.','Combina técnicas dancísticas para enriquecer sus secuencias.','Crea composiciones con dominio técnico, expresivo y estético.'],
+         4:['Propone composiciones sin coherencia técnica ni expresiva.','Crea composiciones con elementos técnicos básicos y expresión corporal.','Propone composiciones coreográficas con transiciones fluidas y creatividad.','Desarrolla composiciones innovadoras con dominio técnico y creativo.']},
+  MUSICA:{2:['Usa elementos musicales sin coherencia ni identidad sonora clara.','Propone características sonoras simples con apoyo.','Relaciona identidades musicales y propone adaptaciones con creatividad.','Crea composiciones que reflejan su entorno y sus gustos.'],
+          3:['Hace adaptaciones sin integrar los territorios musicales.','Compara elementos musicales entre territorios con apoyo.','Integra elementos sonoros de varios territorios en una pieza.','Propone piezas híbridas con dominio técnico y expresivo.'],
+          4:['Crea piezas sin estructura ni relación con el contexto.','Adapta piezas con elementos básicos e intermedios.','Crea adaptaciones con identidad propia y coherencia técnica.','Diseña productos musicales que integran lo cultural y lo técnico.']},
+  TEATRO:{2:['Representa personajes sin coherencia emocional ni narrativa.','Desarrolla personajes con apoyo, usando emoción y conflicto básicos.','Crea personajes e historias con uso efectivo de recursos escénicos.','Usa emoción y conflicto para dinamizar la acción teatral.'],
+          3:['Usa conceptos teatrales sin integrar cuerpo, gesto, voz y objetos.','Integra elementos teatrales en escenas simples con intención comunicativa.','Usa gestos, voz y objetos para enriquecer la narrativa dramática.','Crea narrativas dramáticas profundas con elementos integrados.'],
+          4:['Crea escenas sin profundidad dramática ni comprensión del conflicto.','Comunica emociones y conflictos en escenas con estructura básica.','Construye escenas con profundidad emocional y técnica.','Diseña y ejecuta escenas innovadoras con alto nivel expresivo.']},
+  APV:{2:['Hace composiciones sin intención estética ni técnica definida.','Usa elementos básicos de composición visual en narrativas simples.','Aplica técnicas plásticas con intención estética y narrativa.','Integra materiales y técnicas para expresar emociones y narrativas complejas.'],
+       3:['Usa materiales sin propósito expresivo ni relación con el contexto.','Explora materiales y técnicas con intención expresiva inicial.','Crea piezas visuales que reflejan su percepción del entorno.','Reflexiona sobre su creación desde una perspectiva personal y social.'],
+       4:['Crea piezas sin reflexión crítica ni dominio técnico.','Relaciona el contexto con sus creaciones de forma básica.','Propone ideas artísticas con estética propia y sentido crítico.','Diseña piezas visuales que abordan el contexto con profundidad estética.']}
+};
+LV.CILAB[4]=LV.CILAB[3];
+var NAMES=['Bajo','Básico','Intermedio','Avanzado'], LVC=['var(--lv1)','var(--lv2)','var(--lv3)','var(--lv4)'];
+
+/* ---------- Banco de gestos (p: c compromiso, r representación, a acción y expresión; ciclos [min,max]) ---------- */
+var BANK={
+  CILAB:[
+    {p:'c',k:[1,5],t:'Persiste tras un fallo: vuelve a probar el montaje en lugar de abandonarlo.',alt:'pide ayuda y lo intenta de nuevo con apoyo del equipo.'},
+    {p:'c',k:[1,5],t:'Relaciona el reto con un problema de su casa, barrio o vereda.',alt:'lo cuenta oralmente o lo dibuja.'},
+    {p:'c',k:[3,5],t:'Propone por iniciativa propia una mejora para el prototipo.',alt:'la señala directamente en el prototipo o la marca en un boceto.'},
+    {p:'r',k:[1,3],t:'Nombra las piezas y materiales del prototipo y dice para qué sirve cada uno.',alt:'señala y clasifica las piezas con tarjetas o pictogramas.'},
+    {p:'r',k:[3,5],t:'Interpreta un esquema, plano o diagrama de circuito para armar el montaje.',alt:'sigue un modelo físico o un video paso a paso.'},
+    {p:'r',k:[2,5],t:'Explica qué variable cambió y qué efecto tuvo en el experimento.',alt:'lo muestra con dos montajes comparados lado a lado.'},
+    {p:'a',k:[1,3],t:'Arma el montaje siguiendo la secuencia acordada por el equipo.',alt:'sigue tarjetas de pasos con imágenes.'},
+    {p:'a',k:[2,5],t:'Registra los datos de la prueba en tabla o bitácora.',alt:'toma fotos, graba un audio o dibuja lo que observó.'},
+    {p:'a',k:[1,5],t:'Comunica a otros cómo funciona el prototipo.',alt:'hace una demostración en vivo, un video corto o un cartel.'}
+  ],
+  NEOTECH:[
+    {p:'c',k:[1,5],t:'Se reta a resolver un nivel más difícil del desafío.',alt:'elige entre retos de distinta dificultad según su confianza.'},
+    {p:'c',k:[2,5],t:'Ayuda a un compañero(a) a encontrar el error sin resolverlo por él(ella).',alt:'le hace una pregunta o le señala la parte que debe revisar.'},
+    {p:'c',k:[3,5],t:'Conecta su solución digital con una necesidad real de su comunidad.',alt:'la explica con un ejemplo de su vida cotidiana.'},
+    {p:'r',k:[1,3],t:'Reconoce patrones y ordena los pasos de una secuencia.',alt:'usa tarjetas desconectadas o flechas en el piso.'},
+    {p:'r',k:[3,5],t:'Representa el algoritmo en diagrama de flujo o pseudocódigo.',alt:'lo organiza con tarjetas de bloques o lo dramatiza paso a paso.'},
+    {p:'r',k:[3,5],t:'Explica qué hace cada bloque o línea de su programa.',alt:'lo señala en pantalla mientras el programa se ejecuta.'},
+    {p:'a',k:[2,5],t:'Depura: identifica el error, lo corrige y vuelve a ejecutar.',alt:'marca en el código impreso dónde cree que está el error.'},
+    {p:'a',k:[2,5],t:'Construye un circuito o prototipo funcional con los componentes.',alt:'usa un simulador o arma una versión con materiales reciclados.'},
+    {p:'a',k:[4,5],t:'Argumenta las implicaciones éticas o sociales de su producto digital.',alt:'participa en un debate guiado o elabora un mapa de ventajas y riesgos.'}
+  ],
+  DANZA:[
+    {p:'c',k:[1,5],t:'Propone un movimiento propio para la secuencia del grupo.',alt:'lo muestra primero en pareja antes que al grupo completo.'},
+    {p:'c',k:[1,5],t:'Sigue practicando aunque la secuencia no le salga a la primera.',alt:'practica por partes, con apoyo de un compañero(a) guía.'},
+    {p:'c',k:[2,5],t:'Relaciona la danza con celebraciones o tradiciones de su territorio.',alt:'trae una foto, un objeto o un relato familiar.'},
+    {p:'r',k:[1,3],t:'Responde a consignas de calidad del movimiento: lento, pesado, fluido.',alt:'imita un modelo visual o una imagen de referencia.'},
+    {p:'r',k:[2,5],t:'Reconoce niveles, direcciones y desplazamientos en una secuencia.',alt:'los señala en imágenes o en un mapa del espacio.'},
+    {p:'r',k:[1,5],t:'Sigue el pulso y la estructura de la música al moverse.',alt:'marca el pulso con palmas o con los pies antes de bailar.'},
+    {p:'a',k:[2,5],t:'Ejecuta una secuencia con control corporal y transiciones claras.',alt:'presenta una versión más corta o adaptada a su movilidad.'},
+    {p:'a',k:[1,5],t:'Expresa una emoción o una historia a través del movimiento.',alt:'usa gestos faciales, objetos o telas para apoyar la expresión.'},
+    {p:'a',k:[3,5],t:'Retroalimenta la composición de otro equipo con criterios acordados.',alt:'lo hace por escrito, de forma oral o con señales acordadas.'}
+  ],
+  MUSICA:[
+    {p:'c',k:[1,5],t:'Propone un sonido, ritmo o instrumento de su entorno.',alt:'trae un objeto sonoro de su casa o lo imita con la voz.'},
+    {p:'c',k:[1,5],t:'Escucha y respeta los turnos en la práctica de conjunto.',alt:'sigue una señal visual del(la) docente para entrar y salir.'},
+    {p:'c',k:[2,5],t:'Comparte una música de su familia o de su territorio.',alt:'la canta, la tararea o la reproduce desde una grabación.'},
+    {p:'r',k:[1,3],t:'Diferencia altura, intensidad, duración o timbre de un sonido.',alt:'lo representa con gestos de las manos o con colores.'},
+    {p:'r',k:[2,5],t:'Lee o crea una partitura no convencional con grafías.',alt:'ordena tarjetas con símbolos sonoros.'},
+    {p:'r',k:[3,5],t:'Identifica rasgos propios de distintos territorios musicales.',alt:'los clasifica escuchando ejemplos y eligiendo entre imágenes.'},
+    {p:'a',k:[1,5],t:'Mantiene el pulso al tocar o cantar en grupo.',alt:'usa percusión corporal o un instrumento de menor exigencia técnica.'},
+    {p:'a',k:[2,5],t:'Crea o adapta un fragmento musical con intención.',alt:'lo graba en el celular y lo presenta grabado.'},
+    {p:'a',k:[3,5],t:'Explica las decisiones que tomó en su composición.',alt:'lo muestra con un audio comentado o una ficha visual.'}
+  ],
+  TEATRO:[
+    {p:'c',k:[1,5],t:'Propone una idea o una situación para la escena.',alt:'la dibuja o la cuenta en pequeño grupo antes de compartirla.'},
+    {p:'c',k:[2,5],t:'Se arriesga a improvisar frente al grupo.',alt:'improvisa primero con títeres, máscara o desde detrás de un telón.'},
+    {p:'c',k:[2,5],t:'Acepta y construye sobre la propuesta de su compañero(a).',alt:'continúa la escena con una acción o un objeto, sin necesidad de hablar.'},
+    {p:'r',k:[1,5],t:'Identifica personaje, conflicto y espacio de una historia.',alt:'los ubica en un guion gráfico o en tarjetas.'},
+    {p:'r',k:[2,5],t:'Reconoce la intención que hay detrás de un gesto o una voz.',alt:'la asocia con tarjetas de emociones.'},
+    {p:'r',k:[1,4],t:'Transforma un objeto cotidiano en un elemento escénico.',alt:'muestra el uso del objeto con mímica.'},
+    {p:'a',k:[2,5],t:'Sostiene un personaje con cuerpo, gesto y voz coherentes.',alt:'lo sostiene con cuerpo y gesto, sin texto oral.'},
+    {p:'a',k:[1,5],t:'Comunica una emoción o un conflicto en escena.',alt:'lo hace con una imagen congelada o con sombras.'},
+    {p:'a',k:[3,5],t:'Valora la escena de otros con criterios acordados.',alt:'usa una rúbrica con íconos o una ronda oral guiada.'}
+  ],
+  APV:[
+    {p:'c',k:[1,5],t:'Elige materiales o temas con una intención propia.',alt:'escoge entre opciones preseleccionadas y explica por qué.'},
+    {p:'c',k:[2,5],t:'Vuelve sobre su obra para mejorarla.',alt:'compara su boceto con la versión final con ayuda de preguntas.'},
+    {p:'c',k:[2,5],t:'Relaciona su creación con su entorno o su historia.',alt:'añade un título, un objeto o un relato corto.'},
+    {p:'r',k:[1,4],t:'Reconoce línea, forma, color y textura en una composición.',alt:'los encuentra y señala en imágenes u objetos del entorno.'},
+    {p:'r',k:[2,5],t:'Interpreta una obra o imagen y describe lo que comunica.',alt:'elige tarjetas de emociones o palabras clave.'},
+    {p:'r',k:[3,5],t:'Explora técnicas y explica el efecto de cada una.',alt:'hace un muestrario de técnicas con etiquetas.'},
+    {p:'a',k:[1,5],t:'Aplica una técnica con intención estética.',alt:'usa herramientas adaptadas, como pinceles gruesos, sellos o collage.'},
+    {p:'a',k:[2,5],t:'Organiza la composición con un propósito narrativo.',alt:'la arma con recortes que puede mover antes de fijarlos.'},
+    {p:'a',k:[2,5],t:'Presenta su obra y explica las decisiones que tomó.',alt:'usa una ficha, un audio o una galería en el aula.'}
+  ]
+};
+var PN={c:'Compromiso',r:'Representación',a:'Acción y expresión'};
+
+var selL=document.getElementById('g-linea'), selC=document.getElementById('g-ciclo');
+var filter='all';
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+
+function drawLevels(){
+  var l=selL.value, c=+selC.value, src=c;
+  var note='Descriptores tomados de la escala de niveles por ciclo de Corpoeducación 2026 (redacción ajustada).';
+  if(l==='CILAB'&&(c===3||c===4)) note+=' Para CILAB, la escala agrupa los Ciclos 3 y 4.';
+  if(c===1){src=2;note='Ciclo 1: se muestran los descriptores del Ciclo 2 como referencia. Simplifíquelos con apoyo del líder pedagógico (extrapolación pendiente de validación).';}
+  if(c===5){src=4;note='Ciclo 5: se muestran los descriptores del Ciclo 4 como punto de partida. Amplíelos hacia liderazgo y proyección territorial (extrapolación pendiente de validación).';}
+  if(l==='CILAB'&&src===4) src=3;
+  var d=LV[l][src];
+  document.getElementById('lvl').innerHTML=d.map(function(t,i){return '<div class="lv" style="--c:'+LVC[i]+'"><h3>'+NAMES[i]+'</h3><p>'+esc(t)+'</p></div>'}).join('');
+  document.getElementById('lvlNote').textContent=note;
+}
+
+function bankItems(){
+  var c=+selC.value;
+  return BANK[selL.value].filter(function(g){return c>=g.k[0]&&c<=g.k[1]});
+}
+function drawBank(){
+  var items=bankItems().filter(function(g){return filter==='all'||g.p===filter});
+  var box=document.getElementById('bank');
+  if(!items.length){box.innerHTML='<p class="empty">No hay gestos de este principio para el ciclo elegido. Pruebe con “Todos”.</p>';return;}
+  box.innerHTML=items.map(function(g){
+    var idx=BANK[selL.value].indexOf(g);
+    var cyc=g.k[0]===g.k[1]?'Ciclo '+g.k[0]:'Ciclos '+g.k[0]+' a '+g.k[1];
+    return '<article class="g p-'+g.p+'"><span class="tag">'+PN[g.p]+'</span><p class="txt">'+esc(g.t)+'</p>'+
+      '<p class="alt"><b>Otra forma de mostrarlo:</b> '+esc(g.alt)+'</p>'+
+      '<div class="foot"><span class="cyc">'+cyc+'</span><button class="btn sm" data-use="'+idx+'" aria-label="Registrar gesto: '+esc(g.t)+'">Registrar</button></div></article>';
+  }).join('');
+  document.getElementById('gestList').innerHTML=bankItems().map(function(g){return '<option value="'+esc(g.t)+'">'}).join('');
+}
+function refresh(){drawLevels();drawBank();store.set('l',selL.value);store.set('c',selC.value);}
+
+document.querySelectorAll('.chip').forEach(function(b){b.addEventListener('click',function(){
+  filter=b.dataset.p;
+  document.querySelectorAll('.chip').forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+  drawBank();
+})});
+selL.addEventListener('change',refresh); selC.addEventListener('change',refresh);
+
+/* ---------- Registro ---------- */
+var rows=[]; try{rows=JSON.parse(store.get('reg')||'[]')}catch(e){rows=[]}
+if(!rows.length) rows=[blank(),blank(),blank()];
+function blank(){return {n:'',g:'',p:'',l:''}}
+var body=document.getElementById('regBody'), status=document.getElementById('status');
+function save(msg){store.set('reg',JSON.stringify(rows));status.textContent=msg||'Guardado en este navegador';drawDist();}
+function drawReg(){
+  body.innerHTML='';
+  rows.forEach(function(r,i){
+    var tr=document.createElement('tr');
+    var pOpts='<option value=""></option>'+['c','r','a'].map(function(k){return '<option value="'+k+'"'+(r.p===k?' selected':'')+'>'+PN[k]+'</option>'}).join('');
+    var lOpts='<option value=""></option>'+NAMES.map(function(n){return '<option'+(r.l===n?' selected':'')+'>'+n+'</option>'}).join('');
+    tr.innerHTML='<td><input id="rn'+i+'" aria-label="Estudiante '+(i+1)+'"></td>'+
+      '<td><input id="rg'+i+'" list="gestList" aria-label="Gesto observado '+(i+1)+'"></td>'+
+      '<td><select id="rp'+i+'" aria-label="Principio DUA '+(i+1)+'">'+pOpts+'</select></td>'+
+      '<td><select id="rl'+i+'" aria-label="Nivel '+(i+1)+'">'+lOpts+'</select></td>'+
+      '<td><button class="del" aria-label="Quitar fila '+(i+1)+'">×</button></td>';
+    var ins=tr.querySelectorAll('input'), sels=tr.querySelectorAll('select');
+    ins[0].value=r.n; ins[1].value=r.g;
+    ins[0].addEventListener('input',function(){r.n=this.value;save()});
+    ins[1].addEventListener('input',function(){
+      r.g=this.value;
+      var m=BANK[selL.value].filter(function(g){return g.t===r.g})[0];
+      if(m&&!r.p){r.p=m.p;sels[0].value=m.p;}
+      save();
+    });
+    sels[0].addEventListener('change',function(){r.p=this.value;save()});
+    sels[1].addEventListener('change',function(){r.l=this.value;save()});
+    tr.querySelector('.del').addEventListener('click',function(){rows.splice(i,1);if(!rows.length)rows.push(blank());drawReg();save('Fila quitada')});
+    body.appendChild(tr);
+  });
+}
+function drawDist(){
+  var cnt=[0,0,0,0], tot=0;
+  rows.forEach(function(r){var k=NAMES.indexOf(r.l);if(k>-1){cnt[k]++;tot++}});
+  document.getElementById('distBar').innerHTML=tot?cnt.map(function(n,i){return n?'<span style="width:'+(n/tot*100)+'%;background:'+LVC[i]+'" title="'+NAMES[i]+': '+n+'"></span>':''}).join(''):'';
+  document.getElementById('distLegend').innerHTML=tot?NAMES.map(function(n,i){return '<span><i style="background:'+LVC[i]+'"></i>'+n+': '+cnt[i]+' ('+Math.round(cnt[i]/tot*100)+' %)</span>'}).join(''):'<span>Aún no hay niveles asignados.</span>';
+}
+document.getElementById('bank').addEventListener('click',function(e){
+  var b=e.target.closest('[data-use]'); if(!b) return;
+  var g=BANK[selL.value][+b.dataset.use];
+  var i=rows.findIndex(function(r){return !r.g});
+  if(i<0){rows.push(blank());i=rows.length-1;}
+  rows[i].g=g.t; rows[i].p=g.p;
+  drawReg(); save('Gesto agregado a la fila '+(i+1));
+  var tgt=document.getElementById(rows[i].n?'rl'+i:'rn'+i);
+  if(tgt){tgt.scrollIntoView({block:'center',behavior:'smooth'});tgt.focus({preventScroll:true});}
+});
+document.getElementById('addRow').addEventListener('click',function(){rows.push(blank());drawReg();save();document.getElementById('rn'+(rows.length-1)).focus();});
+var clearArmed=false, clearBtn=document.getElementById('clearReg');
+clearBtn.addEventListener('click',function(){
+  if(!clearArmed){clearArmed=true;clearBtn.textContent='Confirmar: borrar registro';status.textContent='Haga clic de nuevo para borrar todas las filas.';setTimeout(function(){clearArmed=false;clearBtn.textContent='Nuevo registro'},4000);return;}
+  clearArmed=false;clearBtn.textContent='Nuevo registro';rows=[blank(),blank(),blank()];drawReg();save('Registro reiniciado');
+});
+document.getElementById('copyReg').addEventListener('click',function(){
+  var head=['Línea','Ciclo','Estudiante','Gesto observado','Principio DUA','Nivel'];
+  var lin=selL.options[selL.selectedIndex].text, cic='Ciclo '+selC.value;
+  var lines=[head.join('\t')].concat(rows.filter(function(r){return r.n||r.g||r.l}).map(function(r){
+    return [lin,cic,r.n,r.g,PN[r.p]||'',r.l].map(function(v){return String(v).replace(/[\t\n]/g,' ')}).join('\t');
+  }));
+  var txt=lines.join('\n');
+  function fallback(){
+    var ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+    document.body.removeChild(ta);
+    status.textContent=ok?'Registro copiado. Péguelo en Excel o Google Sheets.':'No se pudo copiar automáticamente. Seleccione la tabla y cópiela manualmente.';
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(txt).then(function(){status.textContent='Registro copiado. Péguelo en Excel o Google Sheets.'},fallback);
+  } else fallback();
+});
+
+/* ---------- Inicio ---------- */
+var sl=store.get('l'), sc=store.get('c');
+if(sl&&LV[sl]) selL.value=sl; if(sc) selC.value=sc;
+refresh(); drawReg(); drawDist();
+})();
+</script>
+</body>
+</html>
